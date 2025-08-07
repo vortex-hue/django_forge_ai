@@ -6,4 +6,3 @@ __version__ = "0.1.0"
 __author__ = "DjangoForgeAI Contributors"
 
 default_app_config = "django_forge_ai.apps.DjangoForgeAIConfig"
-
