@@ -7,5 +7,4 @@ __author__ = "DjangoForgeAI Contributors"
 
 default_app_config = "django_forge_ai.apps.DjangoForgeAIConfig"
 # Improve
-# Improve
-
+# Improve 
