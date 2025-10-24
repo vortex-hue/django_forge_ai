@@ -73,4 +73,3 @@ setup(
     keywords="django ai llm rag vector-database openai anthropic machine-learning",
     zip_safe=False,
 )
-
