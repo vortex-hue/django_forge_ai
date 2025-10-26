@@ -27,4 +27,5 @@ default_app_config = "django_forge_ai.apps.DjangoForgeAIConfig"
 # Refactor
 # Improve
 # Update
-# Fix 
+# Fix
+
