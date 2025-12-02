@@ -30,7 +30,7 @@ pip install django-forge-ai
 Or install from source:
 
 ```bash
-git clone https://github.com/yourusername/django-forge-ai.git
+git clone https://github.com/vortex-hue/django_forge_ai.git
 cd django-forge-ai
 pip install -e .
 ```

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-forge-ai"
-version = "0.1.0"
+version = "1.2.6"
 description = "A comprehensive AI toolbox for Django - seamless integration of LLM functionalities, RAG systems, and AI agents"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -60,11 +60,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/django-forge-ai"
-Documentation = "https://github.com/yourusername/django-forge-ai#readme"
-Repository = "https://github.com/yourusername/django-forge-ai"
-Issues = "https://github.com/yourusername/django-forge-ai/issues"
-Changelog = "https://github.com/yourusername/django-forge-ai/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/vortex-hue/django_forge_ai.git"
+Documentation = "https://github.com/vortex-hue/django_forge_ai.git#readme"
+Repository = "https://github.com/vortex-hue/django_forge_ai.git"
+Issues = "https://github.com/vortex-hue/django_forge_ai.git/issues"
+Changelog = "https://github.com/vortex-hue/django_forge_ai.git/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 packages = ["django_forge_ai"]
