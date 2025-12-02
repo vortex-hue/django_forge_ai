@@ -11,7 +11,7 @@ def read_readme():
 
 setup(
     name="django-forge-ai",
-    version="0.1.0",
+    version="1.2.6",
     author="DjangoForgeAI Contributors",
     author_email="your-email@example.com",
     description="A comprehensive AI toolbox for Django - seamless integration of LLM functionalities, RAG systems, and AI agents",
