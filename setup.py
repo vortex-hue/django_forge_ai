@@ -11,7 +11,7 @@ def read_readme():
 
 setup(
     name="django-forge-ai",
-    version="1.2.6",
+    version="1.2.7",
     author="DjangoForgeAI Contributors",
     author_email="your-email@example.com",
     description="A comprehensive AI toolbox for Django - seamless integration of LLM functionalities, RAG systems, and AI agents",
@@ -73,35 +73,3 @@ setup(
     keywords="django ai llm rag vector-database openai anthropic machine-learning",
     zip_safe=False,
 )
-# Refactor
-# Fix
-# Fix
-# Update
-# Improve
-# Refactor
-# Fix
-# Update
-# Refactor
-# Refactor
-# Refactor
-# Improve
-# Refactor
-# Refactor
-# Fix
-# Update
-# Improve
-# Improve
-# Fix
-# Refactor
-# Refactor
-# Improve
-# Refactor
-# Fix
-# Fix
-# Update
-# Refactor
-# Fix
-# Improve
-# Refactor
-# Update
-# Improve

@@ -2,6 +2,14 @@
 
 A comprehensive, plug-and-play toolkit that seamlessly integrates modern AI/LLM functionalities directly into your Django projects. DjangoForgeAI provides "batteries-included" solutions for common AI engineering tasks, including AI-powered admin fields, native RAG system integration, and configurable AI agents, all manageable through the Django admin interface.
 
+![DjangoForgeAI](image.png)
+
+## Demos
+
+**Demo 1**: [Watch on YouTube](https://youtu.be/Xa9G_AY5_ic)
+
+**Demo 2**: [Watch on YouTube](https://youtu.be/bmWhTSAQr5A)
+
 ## Features
 
 ### 1. AI-Powered Admin & Model Fields
