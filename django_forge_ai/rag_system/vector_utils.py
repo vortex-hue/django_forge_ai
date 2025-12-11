@@ -137,7 +137,6 @@ class ChromaDBConnector(VectorDBConnector):
             where=where
         )
         
-        # Format results
         formatted_results = []
         if results['ids'] and len(results['ids'][0]) > 0:
             for i in range(len(results['ids'][0])):
@@ -229,11 +228,10 @@ class QdrantConnector(VectorDBConnector):
         
         points = []
         for i, (embedding, text, metadata, point_id) in enumerate(zip(embeddings, texts, metadatas, ids)):
-            # Add text to metadata
             full_metadata = {**metadata, 'text': text}
             points.append(
                 PointStruct(
-                    id=i,  # Qdrant uses integer IDs
+                    id=i,
                     vector=embedding,
                     payload=full_metadata
                 )
@@ -258,12 +256,10 @@ class QdrantConnector(VectorDBConnector):
         
         query_filter = None
         if filter:
-            # Build Qdrant filter (simplified)
-            conditions = []
-            for key, value in filter.items():
-                conditions.append(
-                    FieldCondition(key=key, match=MatchValue(value=value))
-                )
+            conditions = [
+                FieldCondition(key=key, match=MatchValue(value=value))
+                for key, value in filter.items()
+            ]
             if conditions:
                 query_filter = Filter(must=conditions)
         
@@ -291,13 +287,11 @@ class QdrantConnector(VectorDBConnector):
         if not self._client:
             self.connect()
         
-        # Convert string IDs to integers if needed
         int_ids = []
         for id_str in ids:
             try:
                 int_ids.append(int(id_str))
             except ValueError:
-                # If not integer, skip
                 continue
         
         if int_ids:

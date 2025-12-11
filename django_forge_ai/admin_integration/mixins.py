@@ -44,23 +44,13 @@ class AIAdminMixin:
         return custom_urls + urls
     
     def get_form(self, request, obj=None, **kwargs):
-        """Override form to add AI generation buttons"""
-        form = super().get_form(request, obj, **kwargs)
-        
-        # Add AI generation JavaScript and buttons
-        if hasattr(form, 'Meta') and hasattr(form.Meta, 'widgets'):
-            # This will be handled in the template
-            pass
-        
-        return form
+        """Override form to add AI generation buttons."""
+        return super().get_form(request, obj, **kwargs)
     
     @method_decorator(csrf_exempt)
     @method_decorator(require_http_methods(["POST"]))
     def generate_ai_view(self, request, object_id):
-        """
-        AJAX endpoint for generating AI content.
-        Expects JSON: {'field': 'field_name', 'context': {...}}
-        """
+        """AJAX endpoint for generating AI content. Expects JSON: {'field': 'field_name', 'context': {...}}."""
         try:
             obj = self.get_object(request, object_id)
             if obj is None:
@@ -76,7 +66,6 @@ class AIAdminMixin:
                     status=400
                 )
             
-            # Get prompt template
             prompt_template = self.ai_prompts.get(field_name, '')
             if not prompt_template:
                 return JsonResponse(
@@ -84,26 +73,12 @@ class AIAdminMixin:
                     status=400
                 )
             
-            # Build context from object fields
-            full_context = {}
-            context_fields = self.ai_context_fields.get(field_name, [])
-            for ctx_field in context_fields:
-                if hasattr(obj, ctx_field):
-                    full_context[ctx_field] = str(getattr(obj, ctx_field, ''))
+            full_context = self._build_ai_context(obj, field_name, context)
+            prompt = self._format_ai_prompt(prompt_template, full_context)
             
-            # Merge with provided context
-            full_context.update(context)
+            if isinstance(prompt, JsonResponse):
+                return prompt
             
-            # Format prompt
-            try:
-                prompt = prompt_template.format(**full_context)
-            except KeyError as e:
-                return JsonResponse(
-                    {'error': f'Missing context field: {e}'},
-                    status=400
-                )
-            
-            # Generate content
             llm_client = get_llm_client()
             generated_content = llm_client.generate(prompt=prompt)
             
@@ -118,8 +93,28 @@ class AIAdminMixin:
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     
+    def _build_ai_context(self, obj, field_name: str, provided_context: dict) -> dict:
+        """Build context dictionary from object fields and provided context."""
+        full_context = {}
+        context_fields = self.ai_context_fields.get(field_name, [])
+        for ctx_field in context_fields:
+            if hasattr(obj, ctx_field):
+                full_context[ctx_field] = str(getattr(obj, ctx_field, ''))
+        full_context.update(provided_context)
+        return full_context
+    
+    def _format_ai_prompt(self, prompt_template: str, context: dict):
+        """Format prompt template with context."""
+        try:
+            return prompt_template.format(**context)
+        except KeyError as e:
+            return JsonResponse(
+                {'error': f'Missing context field: {e}'},
+                status=400
+            )
+    
     class Media:
-        """Add custom JavaScript and CSS for AI buttons"""
+        """Add custom JavaScript and CSS for AI buttons."""
         js = ('admin/js/ai_generation.js',)
         css = {
             'all': ('admin/css/ai_generation.css',)

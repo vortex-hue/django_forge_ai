@@ -179,3 +179,5 @@ htmlcov/
 *.bak
 *.log
 
+test_project/
+test_project/

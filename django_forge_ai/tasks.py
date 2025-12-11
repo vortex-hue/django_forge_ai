@@ -101,17 +101,7 @@ def generate_embeddings_task(document_id: int):
 
 
 def _chunk_text(text: str, chunk_size: int = 1000, chunk_overlap: int = 200) -> List[str]:
-    """
-    Split text into chunks with overlap.
-    
-    Args:
-        text: Text to chunk
-        chunk_size: Size of each chunk
-        chunk_overlap: Overlap between chunks
-    
-    Returns:
-        List of text chunks
-    """
+    """Split text into chunks with overlap."""
     chunks = []
     start = 0
     
@@ -119,8 +109,6 @@ def _chunk_text(text: str, chunk_size: int = 1000, chunk_overlap: int = 200) -> 
         end = start + chunk_size
         chunk = text[start:end]
         chunks.append(chunk)
-        
-        # Move start position with overlap
         start = end - chunk_overlap
         if start >= len(text):
             break
@@ -156,25 +144,19 @@ def process_url_document(url: str, knowledge_base_id: int):
         import requests
         from bs4 import BeautifulSoup
         
-        # Fetch URL
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         
-        # Parse HTML
         soup = BeautifulSoup(response.content, 'html.parser')
-        
-        # Extract text
         title = soup.find('title')
         title_text = title.get_text() if title else "Untitled"
         
-        # Remove script and style elements
         for script in soup(["script", "style"]):
             script.decompose()
         
         content = soup.get_text()
-        content = ' '.join(content.split())  # Clean up whitespace
+        content = ' '.join(content.split())
         
-        # Create document
         from .rag_system.models import KnowledgeBase
         kb = KnowledgeBase.objects.get(pk=knowledge_base_id)
         
@@ -186,7 +168,6 @@ def process_url_document(url: str, knowledge_base_id: int):
             source_url=url
         )
         
-        # Trigger embedding generation
         generate_embeddings_task.delay(document.id)
         
         return f"Successfully processed URL: {url}"

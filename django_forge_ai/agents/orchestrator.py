@@ -95,62 +95,64 @@ class AgentOrchestrator:
         return prompt
     
     def _agent_loop(self, task: AgentTask, system_prompt: str, initial_prompt: str) -> str:
-        """Execute the agent reasoning loop"""
+        """Execute the agent reasoning loop."""
         conversation_history = [{"role": "user", "content": initial_prompt}]
         
         for iteration in range(1, self.agent.max_iterations + 1):
-            # Get agent response
-            response = self.llm_client.generate(
-                prompt=conversation_history[-1]["content"],
-                system_prompt=system_prompt,
-                temperature=self.agent.temperature
-            )
-            
-            # Log the response
-            AgentTaskLog.objects.create(
-                task=task,
-                iteration=iteration,
-                action="llm_response",
-                observation=response
-            )
-            
-            # Check if agent wants to use a tool
+            response = self._get_agent_response(conversation_history, system_prompt, task, iteration)
             tool_call = self._extract_tool_call(response)
             
             if tool_call:
-                # Execute tool
                 tool_result = self._execute_tool(tool_call, task, iteration)
-                
-                # Add to conversation
-                conversation_history.append({"role": "assistant", "content": response})
-                conversation_history.append({"role": "user", "content": f"Tool result: {tool_result}"})
-                
-                # Update iterations used
-                task.iterations_used = iteration
-                task.save(update_fields=['iterations_used'])
+                conversation_history = self._update_conversation_with_tool_result(
+                    conversation_history, response, tool_result
+                )
+                self._update_task_iteration(task, iteration)
             else:
-                # Agent has completed the task
-                task.iterations_used = iteration
-                task.save(update_fields=['iterations_used'])
+                self._update_task_iteration(task, iteration)
                 return response
         
-        # Max iterations reached
         return conversation_history[-1].get("content", "Task incomplete - max iterations reached")
     
+    def _get_agent_response(self, conversation_history: list, system_prompt: str, task: AgentTask, iteration: int) -> str:
+        """Get agent response from LLM and log it."""
+        response = self.llm_client.generate(
+            prompt=conversation_history[-1]["content"],
+            system_prompt=system_prompt,
+            temperature=self.agent.temperature
+        )
+        
+        AgentTaskLog.objects.create(
+            task=task,
+            iteration=iteration,
+            action="llm_response",
+            observation=response
+        )
+        return response
+    
+    def _update_conversation_with_tool_result(self, conversation_history: list, response: str, tool_result: str) -> list:
+        """Update conversation history with tool execution result."""
+        conversation_history.append({"role": "assistant", "content": response})
+        conversation_history.append({"role": "user", "content": f"Tool result: {tool_result}"})
+        return conversation_history
+    
+    def _update_task_iteration(self, task: AgentTask, iteration: int):
+        """Update task iteration count."""
+        task.iterations_used = iteration
+        task.save(update_fields=['iterations_used'])
+    
     def _extract_tool_call(self, response: str) -> Optional[Dict[str, Any]]:
-        """Extract tool call from agent response"""
-        # Simple extraction - look for TOOL_CALL: tool_name(args)
-        # In a production system, you'd use structured output or function calling
-        if "TOOL_CALL:" in response:
-            try:
-                parts = response.split("TOOL_CALL:")[1].strip().split("\n")[0]
-                tool_name = parts.split("(")[0].strip()
-                # Extract arguments (simplified)
-                args_str = parts.split("(")[1].split(")")[0] if "(" in parts else ""
-                return {"tool": tool_name, "args": args_str}
-            except Exception:
-                return None
-        return None
+        """Extract tool call from agent response. In production, use structured output or function calling."""
+        if "TOOL_CALL:" not in response:
+            return None
+        
+        try:
+            parts = response.split("TOOL_CALL:")[1].strip().split("\n")[0]
+            tool_name = parts.split("(")[0].strip()
+            args_str = parts.split("(")[1].split(")")[0] if "(" in parts else ""
+            return {"tool": tool_name, "args": args_str}
+        except Exception:
+            return None
     
     def _execute_tool(self, tool_call: Dict[str, Any], task: AgentTask, iteration: int) -> str:
         """Execute a tool call"""
@@ -182,13 +184,11 @@ class AgentOrchestrator:
             return error_msg
     
     def _web_search(self, query: str) -> str:
-        """Web search tool (placeholder)"""
-        # In production, integrate with a real search API
+        """Web search tool placeholder. In production, integrate with a real search API."""
         return f"Web search results for: {query} (placeholder - implement with real search API)"
     
     def _database_query(self, query: str) -> str:
-        """Database query tool (placeholder)"""
-        # In production, execute actual database queries
+        """Database query tool placeholder. In production, execute actual database queries."""
         return f"Database query results for: {query} (placeholder - implement with real DB queries)"
     
     def _file_read(self, file_path: str) -> str:

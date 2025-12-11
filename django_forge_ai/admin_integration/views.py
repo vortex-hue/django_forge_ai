@@ -13,11 +13,11 @@ from ..utils.llm_client import get_llm_client
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AIGenerationView:
-    """Base view for AI generation endpoints"""
+    """Base view for AI generation endpoints."""
     
     @staticmethod
     def generate(request):
-        """Handle AI generation request"""
+        """Handle AI generation request."""
         try:
             data = json.loads(request.body)
             prompt = data.get('prompt')
@@ -26,7 +26,6 @@ class AIGenerationView:
             if not prompt:
                 return JsonResponse({'error': 'Prompt is required'}, status=400)
             
-            # Build full prompt with context
             if context:
                 prompt = prompt.format(**context)
             

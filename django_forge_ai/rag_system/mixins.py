@@ -70,16 +70,8 @@ class SemanticSearchMixin:
         return results
     
     def semantic_filter(self, query: str, **kwargs):
-        """
-        Filter queryset using semantic search results.
-        This is a placeholder - actual implementation would require
-        matching semantic search results back to model instances.
-        """
-        # This would require storing document IDs in the vector DB
-        # and mapping them back to model instances
-        results = self.semantic_search(query, **kwargs)
-        # For now, return original queryset
-        # In a full implementation, you'd filter based on result IDs
+        """Filter queryset using semantic search results. Placeholder - requires document ID mapping."""
+        self.semantic_search(query, **kwargs)
         return self
 
 

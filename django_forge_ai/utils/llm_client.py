@@ -46,14 +46,14 @@ class LLMClient:
         self._initialize_client()
     
     def _get_api_key(self) -> str:
-        """Get API key from settings or environment"""
+        """Get API key from settings or environment."""
         if self.provider == LLMProvider.OPENAI:
             return getattr(
                 settings,
                 "DJANGO_FORGE_AI_OPENAI_API_KEY",
                 os.getenv("OPENAI_API_KEY", "")
             )
-        elif self.provider == LLMProvider.ANTHROPIC:
+        if self.provider == LLMProvider.ANTHROPIC:
             return getattr(
                 settings,
                 "DJANGO_FORGE_AI_ANTHROPIC_API_KEY",
@@ -62,17 +62,37 @@ class LLMClient:
         return ""
     
     def _initialize_client(self):
-        """Initialize the appropriate client based on provider"""
+        """Initialize the appropriate client based on provider."""
         if self.provider == LLMProvider.OPENAI:
-            if not OPENAI_AVAILABLE:
-                raise ImportError("OpenAI package not installed. Install with: pip install openai")
-            self._client = OpenAI(api_key=self.api_key)
+            self._initialize_openai_client()
         elif self.provider == LLMProvider.ANTHROPIC:
-            if not ANTHROPIC_AVAILABLE:
-                raise ImportError("Anthropic package not installed. Install with: pip install anthropic")
-            self._client = anthropic.Anthropic(api_key=self.api_key)
+            self._initialize_anthropic_client()
         else:
             raise ValueError(f"Unsupported LLM provider: {self.provider}")
+    
+    def _initialize_openai_client(self):
+        """Initialize OpenAI client."""
+        if not OPENAI_AVAILABLE:
+            raise ImportError("OpenAI package not installed. Install with: pip install openai")
+        if not self.api_key:
+            raise ValueError(
+                "OpenAI API key not found. Please set DJANGO_FORGE_AI_OPENAI_API_KEY in settings.py "
+                "or set OPENAI_API_KEY environment variable. Get your key from: "
+                "https://platform.openai.com/account/api-keys"
+            )
+        self._client = OpenAI(api_key=self.api_key)
+    
+    def _initialize_anthropic_client(self):
+        """Initialize Anthropic client."""
+        if not ANTHROPIC_AVAILABLE:
+            raise ImportError("Anthropic package not installed. Install with: pip install anthropic")
+        if not self.api_key:
+            raise ValueError(
+                "Anthropic API key not found. Please set DJANGO_FORGE_AI_ANTHROPIC_API_KEY in settings.py "
+                "or set ANTHROPIC_API_KEY environment variable. Get your key from: "
+                "https://console.anthropic.com/"
+            )
+        self._client = anthropic.Anthropic(api_key=self.api_key)
     
     def generate(
         self,
@@ -99,10 +119,9 @@ class LLMClient:
         """
         if self.provider == LLMProvider.OPENAI:
             return self._generate_openai(prompt, model, max_tokens, temperature, system_prompt, **kwargs)
-        elif self.provider == LLMProvider.ANTHROPIC:
+        if self.provider == LLMProvider.ANTHROPIC:
             return self._generate_anthropic(prompt, model, max_tokens, temperature, system_prompt, **kwargs)
-        else:
-            raise ValueError(f"Unsupported provider: {self.provider}")
+        raise ValueError(f"Unsupported provider: {self.provider}")
     
     def _generate_openai(
         self,
@@ -184,8 +203,7 @@ class LLMClient:
         return self._basic_moderation(text)
     
     def _basic_moderation(self, text: str) -> Dict[str, Any]:
-        """Basic keyword-based moderation fallback"""
-        # Simple keyword check - can be enhanced
+        """Basic keyword-based moderation fallback."""
         inappropriate_keywords = getattr(
             settings,
             "DJANGO_FORGE_AI_MODERATION_KEYWORDS",
@@ -193,10 +211,10 @@ class LLMClient:
         )
         
         text_lower = text.lower()
-        flagged = any(keyword.lower() in text_lower for keyword in inappropriate_keywords)
+        is_flagged = any(keyword.lower() in text_lower for keyword in inappropriate_keywords)
         
         return {
-            "flagged": flagged,
+            "flagged": is_flagged,
             "categories": {},
             "category_scores": {},
         }
@@ -221,8 +239,7 @@ class LLMClient:
                 input=text
             )
             return response.data[0].embedding
-        else:
-            raise ValueError(f"Embeddings not supported for provider: {self.provider}")
+        raise ValueError(f"Embeddings not supported for provider: {self.provider}")
 
 
 def get_llm_client(provider: Optional[str] = None) -> LLMClient:
